@@ -4,10 +4,21 @@
 
 #include "private_data.h"
 
+/*
+#define SSID "ssid"
+#define PASSWORD "password"
+
+const char* mqtt_broker = "ip";
+const int mqtt_port = port_n;
+*/
+
+
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-const char* mqtt_topic = "test/topic";
+const char* mqtt_topic = "xcarve_ctl/joystick/cmd";
+const char* joystick_cmds[] = {"Key.up","Key.down", "Key.right", "Key.left"};
+int cont  = 0;
 
 void setup() {
 
@@ -39,7 +50,14 @@ void setup() {
 }
 
 void loop() {
-  // Publish a message
-  client.publish(mqtt_topic, "Hello from ESP32");
-  delay(2000);
+  if (cont  < 4){
+    // Publish a message
+    client.publish(mqtt_topic, joystick_cmds[cont]);
+    cont++;
+  }
+  else{
+    cont = 0;
+  }
+
+  delay(5000);
 }
