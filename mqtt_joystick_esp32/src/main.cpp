@@ -60,7 +60,7 @@ void setup() {
   }
   Serial.println("Connected to the WiFi network");*/
 
-  //initWiFi();
+  initWiFi();
   Serial.println("Connected to the WiFi network");
 
   // Set the MQTT server to the client
@@ -81,19 +81,28 @@ void loop() {
     mqtt_connect();
   }
 
- read_joystick(joystick_status);
- //print_array(joystick_status);
+  read_joystick(joystick_status);
+  //print_array(joystick_status);
 
- //check joystick status, publish first one found in array
- for(int i=0; i<N_PINS; i++){
-  if (joystick_status[i] == 1){
-    // Publish a message
-    client.publish(mqtt_topic, joystick_cmds[i]);
-    Serial.print(joystick_cmds[i]);
-    break;
+  //check joystick status, publish first one found in array
+
+  //check if button was pressed
+  if (joystick_status[0] == 1){
+    //publish message
+    client.publish(mqtt_topic, joystick_cmds[0]);
+    delay(5000); //wait a while for avoiding  mechanical bouncing of button
   }
- }
- delay(100);
+  else { //check the others
+    for(int i=1; i<N_PINS; i++){
+      if (joystick_status[i] == 1){
+        // Publish a message
+        client.publish(mqtt_topic, joystick_cmds[i]);
+        Serial.print(joystick_cmds[i]);
+        break;
+      }
+    }
+  }
+ delay(70);
 
 }
 
