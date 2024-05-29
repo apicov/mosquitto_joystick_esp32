@@ -29,7 +29,7 @@ PubSubClient client(espClient);
 
 void mqtt_subscriber_callback(char* topic, byte* payload, unsigned int length);
 
-const char* mqtt_topic = "xcarve_ctl/joystick/cmd";
+const char* mqtt_topic = "joystick/cmd";
 const char* joystick_cmds[] = {"Button.red", "Key.up", "Key.down", "Key.left", "Key.right","Key.stop"};
 int cont  = 0;
 
