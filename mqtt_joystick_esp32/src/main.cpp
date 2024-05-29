@@ -98,7 +98,7 @@ void loop() {
       if (joystick_status[0] == 1 && previous_status_idx != 0){
         //publish message
         client.publish(mqtt_topic, joystick_cmds[0]);
-        delay(5000); //wait a while for avoiding  mechanical bouncing of button
+        delay(100); //wait a while for avoiding  mechanical bouncing of button
         previous_status_idx = 0;
       }
       else { //check other status flags
