@@ -1,17 +1,42 @@
+/**
+ * @file temp
+ * @brief Alternate/test firmware for ESP32 joystick MQTT publisher.
+ */
 #include <Arduino.h>
 #include <PubSubClient.h>
 #include <WiFi.h>
 
 #include "private_data.h"
 
+/**
+ * @brief Built-in LED pin number for ESP32.
+ */
 int LED_BUILTIN = 2;
 
+/**
+ * @brief Pin number for the red button.
+ */
 #define RED_BUTTON 34
+/**
+ * @brief Pin number for the up direction.
+ */
 #define UP 35
+/**
+ * @brief Pin number for the down direction.
+ */
 #define DOWN 32
+/**
+ * @brief Pin number for the left direction.
+ */
 #define LEFT 33
+/**
+ * @brief Pin number for the right direction.
+ */
 #define RIGHT 25
 
+/**
+ * @brief Number of joystick pins.
+ */
 #define N_PINS 5
 /*
 #define SSID "ssid"
@@ -22,23 +47,61 @@ const int mqtt_port = port_n;
 */
 
 
+/**
+ * @brief MQTT client for ESP32.
+ */
 WiFiClient espClient;
+/**
+ * @brief PubSub MQTT client using espClient.
+ */
 PubSubClient client(espClient);
 
+/**
+ * @brief MQTT topic for joystick commands.
+ */
 const char* mqtt_topic = "xcarve_ctl/joystick/cmd";
+/**
+ * @brief Array of joystick command strings.
+ */
 const char* joystick_cmds[] = {"Button.red", "Key.up", "Key.down", "Key.left", "Key.right"};
+/**
+ * @brief Counter variable (unused).
+ */
 int cont  = 0;
 
 
+/**
+ * @brief Array of joystick pin numbers.
+ */
 const uint8_t joystick_pins[N_PINS] = {RED_BUTTON, UP, DOWN, LEFT, RIGHT};
+/**
+ * @brief Array holding the status of each joystick pin.
+ */
 uint8_t joystick_status[N_PINS] = {0,0,0,0,0};
+/**
+ * @brief Reads the status of the joystick pins and updates the status array.
+ * @param status_array Pointer to the array to update with pin statuses.
+ */
 void read_joystick(uint8_t* status_array);
+/**
+ * @brief Prints the status array to the serial monitor.
+ * @param array Pointer to the array to print.
+ */
 void print_array(uint8_t* array);
 
 
+/**
+ * @brief Connects to the MQTT broker.
+ */
 void mqtt_connect();
+/**
+ * @brief Initializes the WiFi connection.
+ */
 void initWiFi();
 
+/**
+ * @brief Arduino setup function. Initializes serial, pins, WiFi, and MQTT.
+ */
 void setup() {
 
   Serial.begin(9600);
@@ -69,6 +132,9 @@ void setup() {
   mqtt_connect();
 }
 
+/**
+ * @brief Arduino main loop. Handles WiFi/MQTT reconnection and joystick command publishing.
+ */
 void loop() {
 
   //connect to network in case there is no conection
@@ -107,6 +173,9 @@ void loop() {
 }
 
 
+/**
+ * @brief Connects to the MQTT broker, retrying until successful.
+ */
 void mqtt_connect() {
   // Connect to MQTT Broker
   while (!client.connected()) {
@@ -122,6 +191,10 @@ void mqtt_connect() {
 }
 
 
+/**
+ * @brief Reads the status of the joystick pins and updates the status array.
+ * @param status_array Pointer to the array to update with pin statuses.
+ */
 void read_joystick(uint8_t* status_array){
   for(int i=0; i<N_PINS; i++ ){
     status_array[i] = !digitalRead(joystick_pins[i]);
@@ -129,6 +202,10 @@ void read_joystick(uint8_t* status_array){
 
 }
 
+/**
+ * @brief Prints the status array to the serial monitor.
+ * @param array Pointer to the array to print.
+ */
 void print_array(uint8_t* array){
   for(int i=0; i<N_PINS; i++){
     Serial.print(array[i]);
@@ -138,6 +215,9 @@ void print_array(uint8_t* array){
 }
 
 
+/**
+ * @brief Initializes the WiFi connection and waits until connected.
+ */
 void initWiFi() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(SSID, PASSWORD);

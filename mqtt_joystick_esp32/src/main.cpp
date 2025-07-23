@@ -1,18 +1,46 @@
+/**
+ * @file main.cpp
+ * @brief Main firmware for ESP32 joystick MQTT publisher.
+ */
 #include <Arduino.h>
 #include <PubSubClient.h>
 #include <WiFi.h>
 
 #include "private_data.h"
 
+/**
+ * @brief Built-in LED pin number for ESP32.
+ */
 int LED_BUILTIN = 2;
 
+/**
+ * @brief Pin number for the red button.
+ */
 #define RED_BUTTON 34
+/**
+ * @brief Pin number for the up direction.
+ */
 #define UP 35
+/**
+ * @brief Pin number for the down direction.
+ */
 #define DOWN 32
+/**
+ * @brief Pin number for the left direction.
+ */
 #define LEFT 33
+/**
+ * @brief Pin number for the right direction.
+ */
 #define RIGHT 25
 
+/**
+ * @brief Number of joystick pins.
+ */
 #define N_PINS 5
+/**
+ * @brief Length of the status array (N_PINS + 1 for stop command).
+ */
 #define STATUS_ARRAY_LENGTH (N_PINS+1)
 
 /*
@@ -24,29 +52,69 @@ const int mqtt_port = port_n;
 */
 
 
+/**
+ * @brief MQTT client for ESP32.
+ */
 WiFiClient espClient;
+/**
+ * @brief PubSub MQTT client using espClient.
+ */
 PubSubClient client(espClient);
 
-void mqtt_subscriber_callback(char* topic, byte* payload, unsigned int length);
-
+/**
+ * @brief MQTT topic for joystick commands.
+ */
 const char* mqtt_topic = "joystick/cmd";
+/**
+ * @brief Array of joystick command strings.
+ */
 const char* joystick_cmds[] = {"Button.red", "Key.up", "Key.down", "Key.left", "Key.right","Key.stop"};
+/**
+ * @brief Counter variable (unused).
+ */
 int cont  = 0;
 
-//keeps index of last status 
+/**
+ * @brief Index of last status sent.
+ */
 int previous_status_idx = -1;
-//1, jostick is enabled to send commands, 0 is disabled
+/**
+ * @brief Flag to enable (1) or disable (0) joystick command sending.
+ */
 int joystick_enabled_flg = 1;
 
+/**
+ * @brief Array of joystick pin numbers.
+ */
 const uint8_t joystick_pins[N_PINS] = {RED_BUTTON, UP, DOWN, LEFT, RIGHT};
+/**
+ * @brief Array holding the status of each joystick pin and stop command.
+ */
 uint8_t joystick_status[STATUS_ARRAY_LENGTH] = {0,0,0,0,0,0}; //stop command (last position in status array) when all pins are zeros
+/**
+ * @brief Reads the status of the joystick pins and updates the status array.
+ * @param status_array Pointer to the array to update with pin statuses.
+ */
 void read_joystick(uint8_t* status_array);
+/**
+ * @brief Prints the status array to the serial monitor.
+ * @param array Pointer to the array to print.
+ */
 void print_status_array(uint8_t* array);
 
 
+/**
+ * @brief Connects to the MQTT broker.
+ */
 void mqtt_connect();
+/**
+ * @brief Initializes the WiFi connection.
+ */
 void initWiFi();
 
+/**
+ * @brief Arduino setup function. Initializes serial, pins, WiFi, and MQTT.
+ */
 void setup() {
 
   Serial.begin(9600);
@@ -70,6 +138,9 @@ void setup() {
   client.subscribe("joystick/enable");
 }
 
+/**
+ * @brief Arduino main loop. Handles WiFi/MQTT reconnection and joystick command publishing.
+ */
 void loop() {
 
   //connect to wifi network in case there is no conection
@@ -120,6 +191,9 @@ void loop() {
 }
 
 
+/**
+ * @brief Connects to the MQTT broker, retrying until successful.
+ */
 void mqtt_connect() {
   // Connect to MQTT Broker
   while (!client.connected()) {
@@ -135,6 +209,12 @@ void mqtt_connect() {
 }
 
 
+/**
+ * @brief Callback for MQTT subscription. Enables/disables joystick based on payload.
+ * @param topic The topic of the incoming message.
+ * @param payload The payload of the incoming message.
+ * @param length The length of the payload.
+ */
 void mqtt_subscriber_callback(char* topic, byte* payload, unsigned int length){
   //receives ascii code of 1(49)enable and 0(48)disable joystick
   joystick_enabled_flg = (*payload)==48?0:1;
@@ -150,6 +230,10 @@ void mqtt_subscriber_callback(char* topic, byte* payload, unsigned int length){
 }
 
 
+/**
+ * @brief Reads the status of the joystick pins and updates the status array.
+ * @param status_array Pointer to the array to update with pin statuses.
+ */
 void read_joystick(uint8_t* status_array){
   uint8_t pin_sum = 0;
 
@@ -168,6 +252,10 @@ void read_joystick(uint8_t* status_array){
 
 }
 
+/**
+ * @brief Prints the status array to the serial monitor.
+ * @param array Pointer to the array to print.
+ */
 void print_status_array(uint8_t* array){
   for(int i=0; i<=N_PINS; i++){
     Serial.print(array[i]);
@@ -177,6 +265,9 @@ void print_status_array(uint8_t* array){
 }
 
 
+/**
+ * @brief Initializes the WiFi connection and waits until connected.
+ */
 void initWiFi() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(SSID, PASSWORD);
